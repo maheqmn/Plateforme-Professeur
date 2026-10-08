@@ -79,8 +79,24 @@ transactionnel (Brevo, Postmark...) dans `src/lib/email.ts`.
 - Les pièces jointes des articles réutilisent le modèle `Fichier` de la phase 2 et la
   route `/fichiers/[id]` (accès élève uniquement si le contenu est publié).
 
+### Ce qui est implémenté en phase 4 (messagerie, F4)
+
+- Conversation privée unique entre chaque élève et le professeur — aucune
+  communication entre élèves, pas de recherche de destinataire (F4.1).
+- Vue élève : historique déroulant, bulles distinctes selon l'expéditeur, saisie
+  en bas, bouton « Envoyer » grand et visible (F4.2).
+- Vue professeur : liste des conversations (nom de l'élève, dernier message,
+  date, nombre de non lus) ; un clic ouvre la conversation complète (F4.3).
+- Envoi de texte et pièces jointes (images, PDF, 10 Mo max par fichier) ;
+  suppression de son propre message dans les 5 minutes avec confirmation,
+  modération professeur illimitée (F4.4, F4.6).
+- Point rouge sur l'entrée « Messages » de la barre latérale en cas de non lu,
+  et email au destinataire avec lien direct vers la conversation (F4.5).
+- Les pièces jointes de messages réutilisent le modèle `Fichier` et la route
+  `/fichiers/[id]` (accessibles seulement aux deux participants).
+
 ### À faire (phases suivantes)
 
 - Avertissement « Vous allez être déconnecté » 2 minutes avant expiration (F1.7, partie client).
 - Mentions légales et politique de confidentialité rédigées (8.3).
-- Messagerie (phase 4), calendrier (phase 5).
+- Calendrier (phase 5).

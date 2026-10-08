@@ -1056,6 +1056,155 @@ a.folder-card {
   font-size: 0.9rem;
 }
 
+/* ---------- Messagerie (phase 4, F4) ---------- */
+
+/* F4.5 : point rouge sur l'entrée "Messages" de la barre latérale. */
+.sidebar nav a {
+  position: relative;
+}
+
+.badge-non-lu {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--danger);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.conversation-item {
+  align-items: center;
+}
+
+.conversation-item .avatar {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+}
+
+.conversation-item h3 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.conversation-date {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 0.85rem;
+}
+
+.chat-fenetre {
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  gap: 16px;
+}
+
+.chat-vide {
+  margin: 12px 4px 0;
+}
+
+.chat-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 460px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.bulle-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bulle-bloc.de-moi {
+  align-items: flex-end;
+}
+
+.bulle-bloc.de-lautre {
+  align-items: flex-start;
+}
+
+.bulle {
+  max-width: 78%;
+  background: #f0f1f6;
+  border-radius: 14px 14px 14px 4px;
+  padding: 10px 14px;
+}
+
+.de-moi .bulle {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 14px 14px 4px 14px;
+}
+
+.bulle p {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.bulle-fichiers {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.de-moi .bulle-fichiers .link {
+  color: #fff;
+}
+
+.bulle-bloc form {
+  margin: 0;
+}
+
+.bulle-bloc .btn-small {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  background: transparent;
+  color: var(--text-muted);
+  border-color: transparent;
+}
+
+.bulle-bloc .btn-small:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.chat-formulaire {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-formulaire .champ-texte {
+  resize: vertical;
+}
+
+.chat-formulaire-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 /* ---------- Responsive (exigence 7.5) ---------- */
 
 @media (max-width: 900px) {

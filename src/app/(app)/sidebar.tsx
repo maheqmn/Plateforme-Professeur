@@ -17,10 +17,12 @@ export default function Sidebar({
   prenom,
   nom,
   role,
+  messagesNonLus = 0,
 }: {
   prenom: string;
   nom: string;
   role: string;
+  messagesNonLus?: number;
 }) {
   const chemin = usePathname();
   const initiales = (prenom.charAt(0) + nom.charAt(0)).toUpperCase();
@@ -43,6 +45,10 @@ export default function Sidebar({
               {lien.icone}
             </span>{" "}
             {lien.label}
+            {/* F4.5 : point rouge en cas de message non lu */}
+            {lien.label === "Messages" && messagesNonLus > 0 && (
+              <span className="badge-non-lu" title={messagesNonLus + " message(s) non lu(s)"} />
+            )}
           </Link>
         ))}
         {estProfesseur && (

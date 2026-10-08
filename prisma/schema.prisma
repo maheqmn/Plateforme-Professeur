@@ -32,6 +32,8 @@ model User {
   invitationUtilisee Invitation?      @relation("InvitationUtilisateur")
   progressions      Progression[]
   consultations     Consultation[]
+  messagesEnvoyes   Message[]  @relation("MessageAuteur")
+  conversations     Message[]  @relation("MessageConversation")
 }
 
 model Invitation {
@@ -143,6 +145,8 @@ model Fichier {
   cours     Cours?   @relation(fields: [coursId], references: [id], onDelete: Cascade)
   articleId String?
   article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  messageId String?
+  message   Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
 }
 
@@ -161,6 +165,25 @@ model Article {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  fichiers Fichier[]
+}
+
+// ----- Phase 4 (F4 : messagerie professeur / élève) -----
+
+// F4.1 : conversation unique entre un élève et le professeur. Le champ
+// eleveId identifie la conversation (un élève = une conversation, jamais
+// entre élèves). "luLe" = date de lecture par le destinataire (F4.5) :
+// null tant que le message n'a pas été ouvert.
+model Message {
+  id      String    @id @default(cuid())
+  texte   String    @default("")
+  auteurId String
+  eleveId String
+  luLe    DateTime?
+  creeLe  DateTime  @default(now())
+
+  auteur  User     @relation("MessageAuteur", fields: [auteurId], references: [id], onDelete: Cascade)
+  eleve   User     @relation("MessageConversation", fields: [eleveId], references: [id], onDelete: Cascade)
   fichiers Fichier[]
 }
 

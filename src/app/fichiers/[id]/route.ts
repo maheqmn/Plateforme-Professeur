@@ -16,15 +16,18 @@ export async function GET(
   const { id } = await params;
   const fichier = await prisma.fichier.findUnique({
     where: { id },
-    include: { cours: true, article: true },
+    include: { cours: true, article: true, message: true },
   });
   if (!fichier) {
     return new Response("Fichier introuvable.", { status: 404 });
   }
   if (utilisateur.role !== "PROFESSEUR") {
+    // Un élève n'accède qu'aux fichiers d'un contenu publié, ou aux pièces
+    // jointes de sa propre conversation (F4.1).
     const visible =
       (fichier.coursId !== null && fichier.cours?.publie === true) ||
-      (fichier.articleId !== null && fichier.article?.publie === true);
+      (fichier.articleId !== null && fichier.article?.publie === true) ||
+      (fichier.messageId !== null && fichier.message?.eleveId === utilisateur.id);
     if (!visible) {
       return new Response("Accès refusé.", { status: 403 });
     }
