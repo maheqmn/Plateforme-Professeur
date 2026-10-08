@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accueil (blog) — Maquette</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">L</div>
+        <span>Plateforme<br>du professeur</span>
+      </div>
+      <nav>
+        <a href="dashboard.html" class="active"><span class="nav-icon">&#127968;</span> Accueil</a>
+        <a href="cours.html"><span class="nav-icon">&#128218;</span> Mes cours</a>
+        <a href="#"><span class="nav-icon">&#9993;</span> Messages <span class="badge">1</span></a>
+        <a href="calendrier.html"><span class="nav-icon">&#128197;</span> Calendrier</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="avatar">MD</div>
+        <div>
+          <div class="user-name">Marie Dupont</div>
+          <div class="user-role">Élève</div>
+        </div>
+        <button type="button" class="btn-logout">Se déconnecter</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <h1 class="page-title">Bonjour Marie</h1>
+      <p class="page-subtitle">Voici les dernières nouvelles de votre professeur.</p>
+
+      <section class="welcome">
+        <div>
+          <h2>Bienvenue sur votre espace</h2>
+          <p>Retrouvez ici vos cours, vos messages et vos rendez-vous, toujours au même endroit.</p>
+        </div>
+        <div class="progress">
+          <strong>4 / 12</strong>
+          <span>cours terminés dans « Cours débutant »</span>
+        </div>
+      </section>
+
+      <div class="article-grid">
+        <article class="article-card">
+          <div class="article-cover" style="background: linear-gradient(135deg, #fde8d8, #f7cfae);">&#128231;</div>
+          <div class="article-body">
+            <span class="pin">&#128204; À la une</span>
+            <div class="article-meta">8 octobre 2026</div>
+            <h3>Reconnaître un email frauduleux</h3>
+            <p>Les emails suspects ont des signes qui ne trompent pas : expéditeur inconnu, fautes d'orthographe, urgence suspecte. Voici les trois vérifications à faire avant de cliquer.</p>
+            <a href="#" class="btn">Lire l'article</a>
+          </div>
+        </article>
+
+        <article class="article-card">
+          <div class="article-cover" style="background: linear-gradient(135deg, #dde6fa, #c3d2f2);">&#128269;</div>
+          <div class="article-body">
+            <div class="article-meta">1er octobre 2026</div>
+            <h3>Bien chercher sur Internet</h3>
+            <p>Pour trouver une information fiable, quelques mots-clés bien choisis suffisent. Ce guide vous montre comment formuler votre recherche et repérer les bons résultats.</p>
+            <a href="#" class="btn">Lire l'article</a>
+          </div>
+        </article>
+
+        <article class="article-card">
+          <div class="article-cover" style="background: linear-gradient(135deg, #e2f4e9, #c3e6d2);">&#9997;</div>
+          <div class="article-body">
+            <div class="article-meta">24 septembre 2026</div>
+            <h3>Utiliser sa messagerie en toute tranquillité</h3>
+            <p>Écrire, répondre, joindre une photo : la messagerie n'a pas besoin d'être compliquée. Reprenons ensemble chaque geste, étape par étape.</p>
+            <a href="#" class="btn">Lire l'article</a>
+          </div>
+        </article>
+      </div>
+    </main>
+  </div>
+  <script src="js/maquette.js"></script>
+</body>
+</html>

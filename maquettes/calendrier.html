@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendrier — Maquette</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">L</div>
+        <span>Plateforme<br>du professeur</span>
+      </div>
+      <nav>
+        <a href="dashboard.html"><span class="nav-icon">&#127968;</span> Accueil</a>
+        <a href="cours.html"><span class="nav-icon">&#128218;</span> Mes cours</a>
+        <a href="#"><span class="nav-icon">&#9993;</span> Messages <span class="badge">1</span></a>
+        <a href="calendrier.html" class="active"><span class="nav-icon">&#128197;</span> Calendrier</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="avatar">MD</div>
+        <div>
+          <div class="user-name">Marie Dupont</div>
+          <div class="user-role">Élève</div>
+        </div>
+        <button type="button" class="btn-logout">Se déconnecter</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <h1 class="page-title">Calendrier</h1>
+      <p class="page-subtitle">Consultez les dates des cours et prenez un rendez-vous sur un créneau vert « Disponible ».</p>
+
+      <section class="calendar-card">
+        <div class="calendar-header">
+          <h2>Octobre 2026</h2>
+          <div class="view-switch">
+            <a href="#" class="active">Mois</a>
+            <a href="#">Semaine</a>
+          </div>
+        </div>
+
+        <div class="calendar-grid">
+          <div class="day-name">Lun</div>
+          <div class="day-name">Mar</div>
+          <div class="day-name">Mer</div>
+          <div class="day-name">Jeu</div>
+          <div class="day-name">Ven</div>
+          <div class="day-name">Sam</div>
+          <div class="day-name">Dim</div>
+
+          <div class="day-cell empty"></div>
+          <div class="day-cell empty"></div>
+          <div class="day-cell empty"></div>
+          <div class="day-cell"><span class="day-num">1</span></div>
+          <div class="day-cell"><span class="day-num">2</span></div>
+          <div class="day-cell"><span class="day-num">3</span></div>
+          <div class="day-cell"><span class="day-num">4</span></div>
+
+          <div class="day-cell"><span class="day-num">5</span></div>
+          <div class="day-cell"><span class="day-num">6</span></div>
+          <div class="day-cell"><span class="day-num">7</span></div>
+          <div class="day-cell today"><span class="day-num">8</span>
+            <span class="event rdv">Rendez-vous</span>
+          </div>
+          <div class="day-cell"><span class="day-num">9</span></div>
+          <div class="day-cell"><span class="day-num">10</span></div>
+          <div class="day-cell"><span class="day-num">11</span></div>
+
+          <div class="day-cell"><span class="day-num">12</span></div>
+          <div class="day-cell"><span class="day-num">13</span></div>
+          <div class="day-cell"><span class="day-num">14</span>
+            <span class="event course">Cours collectif</span>
+          </div>
+          <div class="day-cell"><span class="day-num">15</span>
+            <span class="event slot">Disponible</span>
+          </div>
+          <div class="day-cell"><span class="day-num">16</span>
+            <span class="event slot">Disponible</span>
+          </div>
+          <div class="day-cell"><span class="day-num">17</span></div>
+          <div class="day-cell"><span class="day-num">18</span></div>
+
+          <div class="day-cell"><span class="day-num">19</span></div>
+          <div class="day-cell"><span class="day-num">20</span></div>
+          <div class="day-cell"><span class="day-num">21</span>
+            <span class="event course">Cours collectif</span>
+          </div>
+          <div class="day-cell"><span class="day-num">22</span>
+            <span class="event slot">Disponible</span>
+          </div>
+          <div class="day-cell"><span class="day-num">23</span>
+            <span class="event slot">Disponible</span>
+          </div>
+          <div class="day-cell"><span class="day-num">24</span></div>
+          <div class="day-cell"><span class="day-num">25</span></div>
+
+          <div class="day-cell"><span class="day-num">26</span></div>
+          <div class="day-cell"><span class="day-num">27</span></div>
+          <div class="day-cell"><span class="day-num">28</span></div>
+          <div class="day-cell"><span class="day-num">29</span>
+            <span class="event slot">Disponible</span>
+          </div>
+          <div class="day-cell"><span class="day-num">30</span>
+            <span class="event slot">Disponible</span>
+          </div>
+          <div class="day-cell"><span class="day-num">31</span></div>
+          <div class="day-cell empty"></div>
+        </div>
+
+        <div class="calendar-legend">
+          <span><span class="legend-dot" style="background: #5b6bd6;"></span>Cours collectif</span>
+          <span><span class="legend-dot" style="background: #c07c2a;"></span>Vos rendez-vous</span>
+          <span><span class="legend-dot" style="background: #3d9a6b;"></span>Créneau disponible à la réservation</span>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="js/maquette.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+// Modèle de données — Phase 1 (F1 : authentification, invitations, rôles).
+// SQLite en développement ; le schéma est compatible PostgreSQL (exigence 8.1)
+// en remplaçant simplement DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  prenom            String
+  nom               String
+  email             String    @unique
+  passwordHash      String
+  role              String // "PROFESSEUR" | "ELEVE" (pas d'enum en SQLite)
+  actif             Boolean   @default(true)
+  derniereConnexion DateTime?
+  tentativesEchouees Int      @default(0)
+  verrouilleJusqua  DateTime?
+  createdAt         DateTime  @default(now())
+
+  sessions          Session[]
+  connexions        LoginEvent[]
+  reinitialisations PasswordReset[]
+  codes2FA          TwoFactorCode[]
+  invitationsCrees Invitation[]       @relation("InvitationCreateur")
+  invitationUtilisee Invitation?      @relation("InvitationUtilisateur")
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  expireLe    DateTime
+  utilisee    Boolean   @default(false)
+  revoquee    Boolean   @default(false)
+  emailInvite String?
+  createdAt   DateTime  @default(now())
+
+  createdById String
+  createdBy   User      @relation("InvitationCreateur", fields: [createdById], references: [id])
+  usedById    String?   @unique
+  usedBy      User?     @relation("InvitationUtilisateur", fields: [usedById], references: [id])
+}
+
+// Session côté serveur : cookie httpOnly contient un jeton aléatoire,
+// seule son empreinte (SHA-256) est stockée (exigence 8.2).
+model Session {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rememberMe Boolean  @default(false)
+  expireLe   DateTime
+  createdAt  DateTime @default(now())
+}
+
+// F1.9 : traçabilité des connexions.
+model LoginEvent {
+  id     String   @id @default(cuid())
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date   DateTime @default(now())
+  succes Boolean  @default(true)
+}
+
+// F1.6 : réinitialisation de mot de passe, lien valable 1 heure.
+model PasswordReset {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expireLe  DateTime
+  utiliseLe DateTime?
+}
+
+// F1.5 : double authentification par email du compte professeur (code à 6 chiffres).
+model TwoFactorCode {
+  id         String    @id @default(cuid())
+  token      String    @unique
+  codeHash   String
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expireLe   DateTime
+  consommeLe DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+// F6.3 : paramètres du professeur (durée de validité des invitations, etc.).
+model Setting {
+  key   String @id
+  value String
+}

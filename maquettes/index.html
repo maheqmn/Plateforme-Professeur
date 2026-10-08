@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 0 — Maquettes des écrans principaux</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="layout">
+    <main class="main">
+      <h1 class="page-title">Phase 0 — Maquettes des écrans principaux</h1>
+      <p class="page-subtitle">
+        Cahier des charges v1.0 (8 octobre 2026) &middot; référence visuelle : dashboard « Coursue » (Fireart Studio).
+        Maquettes statiques côté élève. Le module d'administration professeur (F6) sera maquetté en phase 1.
+      </p>
+
+      <div class="course-list">
+        <a class="course-item" href="connexion.html" style="text-decoration: none; color: inherit;">
+          <span class="doc-icon">&#128274;</span>
+          <div>
+            <h3>Écran de connexion</h3>
+            <p class="course-desc">Deux champs, un bouton, les liens invitation / mot de passe oublié / espace professeur (F1.1).</p>
+          </div>
+        </a>
+        <a class="course-item" href="dashboard.html" style="text-decoration: none; color: inherit;">
+          <span class="doc-icon">&#127968;</span>
+          <div>
+            <h3>Dashboard — blog d'accueil</h3>
+            <p class="course-desc">Encart de bienvenue, progression, cartes d'articles avec article épinglé (F3).</p>
+          </div>
+        </a>
+        <a class="course-item" href="cours.html" style="text-decoration: none; color: inherit;">
+          <span class="doc-icon">&#128218;</span>
+          <div>
+            <h3>Mes cours</h3>
+            <p class="course-desc">Dossiers niveau 1 en grandes cartes, liste des cours niveau 2, fil d'Ariane (F2).</p>
+          </div>
+        </a>
+        <a class="course-item" href="calendrier.html" style="text-decoration: none; color: inherit;">
+          <span class="doc-icon">&#128197;</span>
+          <div>
+            <h3>Calendrier</h3>
+            <p class="course-desc">Vue mensuelle, cours collectifs, rendez-vous privés, créneaux « Disponible » en vert (F5).</p>
+          </div>
+        </a>
+      </div>
+
+      <p class="page-subtitle" style="margin-top: 28px; margin-bottom: 0;">
+        Boutons « A+ / A- » présents sur chaque écran (exigence 7.1). Ouvrir les maquettes dans un navigateur.
+      </p>
+    </main>
+  </div>
+  <script src="js/maquette.js"></script>
+</body>
+</html>
