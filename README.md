@@ -50,8 +50,37 @@ transactionnel (Brevo, Postmark...) dans `src/lib/email.ts`.
   préparation (F3.5).
 - Administration professeur : invitations, élèves, paramètres (F6.1 à F6.3, partie phase 1).
 
+### Ce qui est implémenté en phase 2 (gestion des cours, F2)
+
+- Arborescence à deux niveaux : dossiers (catégories) en grandes cartes, liste des cours,
+  page de cours avec fil d'Ariane (F2.1, F2.2, exigence 7.4).
+- Contenu de cours : texte mis en forme (titres, gras, listes, liens — markdown simple,
+  rendu sécurisé par échappement HTML), fichiers joints (10 Mo max, stockage local
+  `stockage/`), lien externe optionnel (F2.3).
+- Mode édition professeur : nouveau dossier, nouveau cours, modifier, supprimer avec
+  confirmation nommée, boutons Monter/Descendre, déplacement d'un cours entre dossiers (F2.5, F2.7).
+- Publication : un nouveau cours est « en préparation » ; seul le professeur le voit
+  jusqu'à publication (F2.6).
+- Progression : case « Cours terminé » pour l'élève, et bloc de progression sur le
+  dashboard dans la catégorie la plus consultée (F2.3, F2.4).
+
+### Ce qui est implémenté en phase 3 (blog d'accueil, F3)
+
+- Le dashboard est le blog : cartes des derniers articles avec image ou illustration,
+  titre, date, chapô de deux lignes, bouton « Lire l'article » (F3.1).
+- Article complet : titre, date, image d'illustration, texte mis en forme (markdown
+  étendu aux images téléchargées), fichiers joints, « Publié par [nom] » et
+  « Retour aux articles » (F3.3).
+- Rédaction professeur : éditeur simple (titre, gras, listes, liens, images par
+  téléchargement), statut brouillon / publié, enregistrement automatique toutes les
+  60 secondes et alerte si l'onglet est fermé avec des modifications non enregistrées (F3.4).
+- Réorganisation : ordre antichronologique, article épinglable « À la une » affiché
+  en tête (F3.6).
+- Les pièces jointes des articles réutilisent le modèle `Fichier` de la phase 2 et la
+  route `/fichiers/[id]` (accès élève uniquement si le contenu est publié).
+
 ### À faire (phases suivantes)
 
 - Avertissement « Vous allez être déconnecté » 2 minutes avant expiration (F1.7, partie client).
 - Mentions légales et politique de confidentialité rédigées (8.3).
-- Cours (phase 2), blog (phase 3), messagerie (phase 4), calendrier (phase 5).
+- Messagerie (phase 4), calendrier (phase 5).

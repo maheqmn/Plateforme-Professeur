@@ -30,6 +30,8 @@ model User {
   codes2FA          TwoFactorCode[]
   invitationsCrees Invitation[]       @relation("InvitationCreateur")
   invitationUtilisee Invitation?      @relation("InvitationUtilisateur")
+  progressions      Progression[]
+  consultations     Consultation[]
 }
 
 model Invitation {
@@ -94,4 +96,95 @@ model TwoFactorCode {
 model Setting {
   key   String @id
   value String
+}
+
+// ----- Phase 2 (F2 : gestion des cours) -----
+
+// F2.1 — niveau 1 : la catégorie ("Cours débutant", "Cours avancé"...).
+model Categorie {
+  id        String   @id @default(cuid())
+  titre     String
+  ordre     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cours         Cours[]
+  consultations Consultation[]
+}
+
+// F2.3 — niveau 2 : le cours unitaire. "publie" à false = en préparation (F2.6).
+model Cours {
+  id          String   @id @default(cuid())
+  titre       String
+  description String
+  contenu     String   @default("") // markdown simple (titres, listes, gras)
+  lienExterne String?
+  publie      Boolean  @default(false)
+  ordre       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categorieId String
+  categorie   Categorie   @relation(fields: [categorieId], references: [id], onDelete: Cascade)
+  fichiers   Fichier[]
+  progressions Progression[]
+}
+
+// F2.3 — fichiers joints à un cours ou à un article de blog (PDF, images,
+// documents bureautiques). Phase 3 : la pièce jointe est rattachée soit à
+// un cours, soit à un article (les deux sont optionnels).
+model Fichier {
+  id        String   @id @default(cuid())
+  nom       String // nom d'origine, affiché à l'élève
+  nomStocke String // nom du fichier sur le disque (généré, sans risque)
+  taille    Int
+  estContenu Boolean @default(false) // phase 3 : image insérée dans le texte d'un article
+  coursId   String?
+  cours     Cours?   @relation(fields: [coursId], references: [id], onDelete: Cascade)
+  articleId String?
+  article   Article? @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+// ----- Phase 3 (F3 : blog d'accueil) -----
+
+// F3.1 / F3.4 — article de blog affiché sur le dashboard.
+// "publie" à false = brouillon ; "epingle" = "À la une" (F3.6).
+model Article {
+  id             String    @id @default(cuid())
+  titre          String
+  contenu        String    @default("") // markdown simple (titres, listes, gras, liens, images)
+  imageNomStocke String? // image d'illustration optionnelle (F3.3)
+  publie         Boolean   @default(false)
+  epingle        Boolean   @default(false)
+  publieLe       DateTime? // date de première publication, affichée sur les cartes
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  fichiers Fichier[]
+}
+
+// F2.3 / F2.4 — case "Cours terminé" cochée par l'élève.
+model Progression {
+  eleveId   String
+  coursId   String
+  termineLe DateTime @default(now())
+
+  eleve User  @relation(fields: [eleveId], references: [id], onDelete: Cascade)
+  cours Cours @relation(fields: [coursId], references: [id], onDelete: Cascade)
+
+  @@id([eleveId, coursId])
+}
+
+// F2.4 — suivi des catégories consultées, pour afficher la progression
+// dans la catégorie la plus consultée par l'élève.
+model Consultation {
+  eleveId     String
+  categorieId String
+  nb          Int      @default(0)
+
+  eleve     User      @relation(fields: [eleveId], references: [id], onDelete: Cascade)
+  categorie Categorie @relation(fields: [categorieId], references: [id], onDelete: Cascade)
+
+  @@id([eleveId, categorieId])
 }

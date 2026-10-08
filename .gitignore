@@ -14,5 +14,8 @@ next-env.d.ts
 prisma/dev.db
 prisma/dev.db-journal
 
+# fichiers téléversés par le professeur (développement)
+stockage/
+
 # divers
 .DS_Store

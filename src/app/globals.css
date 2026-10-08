@@ -423,6 +423,10 @@ body {
   border-radius: var(--radius);
   padding: 26px 30px;
   margin-bottom: 30px;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
 }
 
 .welcome h2 {
@@ -436,12 +440,41 @@ body {
   opacity: 0.92;
 }
 
+.welcome .progress {
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  padding: 12px 18px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.welcome .progress strong {
+  display: block;
+  font-size: 1.15rem;
+}
+
+.welcome .progress span {
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
 /* ---------- Dossiers de cours ---------- */
 
 .folder-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 22px;
+}
+
+.folder-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.folder-bloc > .folder-card {
+  flex: 1;
 }
 
 .folder-card {
@@ -613,6 +646,414 @@ a.folder-card {
   border: none;
   padding: 0;
   background: transparent;
+}
+
+/* ---------- Vue catégorie et cours (phase 2, F2) ---------- */
+
+.crumbs {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 24px;
+}
+
+.crumbs a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.crumbs a:hover {
+  text-decoration: underline;
+}
+
+.course-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.course-item {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.course-item h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.course-item h3 a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.course-item h3 a:hover {
+  color: var(--accent);
+}
+
+.doc-icon {
+  font-size: 1.4rem;
+}
+
+.course-desc {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.done-tag {
+  margin-left: auto;
+  color: var(--green);
+  font-weight: 700;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.actions-enseignant,
+.actions-enseignant-dossier {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actions-enseignant-dossier {
+  margin-left: 0;
+}
+
+.tag.brouillon {
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+
+.btn-secondary {
+  background: #eef0fa;
+  color: var(--accent);
+}
+
+.btn-secondary:hover {
+  background: #e0e4f6;
+}
+
+/* Contenu rédigé d'un cours */
+.contenu-cours {
+  margin-bottom: 24px;
+}
+
+.contenu-cours h2 {
+  font-size: 1.2rem;
+  margin: 24px 0 10px;
+}
+
+.contenu-cours h3 {
+  font-size: 1.05rem;
+  margin: 20px 0 8px;
+}
+
+.contenu-cours p {
+  margin: 0 0 12px;
+}
+
+.contenu-cours ul {
+  margin: 0 0 12px;
+  padding-left: 26px;
+}
+
+.contenu-cours li {
+  margin-bottom: 6px;
+}
+
+.contenu-cours a {
+  color: var(--accent);
+}
+
+/* Fichiers joints */
+.file-list {
+  margin-bottom: 24px;
+}
+
+.file-item {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.file-item > div {
+  flex: 1;
+}
+
+.file-item .btn,
+.file-item form {
+  flex-shrink: 0;
+}
+
+/* Formulaires repliables du professeur */
+.details-form {
+  margin-bottom: 24px;
+}
+
+.details-form summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--accent);
+  padding: 4px 0;
+}
+
+.details-form[open] summary {
+  margin-bottom: 18px;
+}
+
+.details-inline {
+  position: relative;
+}
+
+.details-inline summary {
+  cursor: pointer;
+  list-style: none;
+  display: inline-flex;
+}
+
+.popover-form {
+  margin-top: 12px;
+}
+
+/* Zone enseignant d'une page de cours */
+.zone-enseignant {
+  margin-bottom: 28px;
+}
+
+/* Barre de mise en forme de l'éditeur */
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.champ-texte {
+  width: 100%;
+  font-size: 1rem;
+  font-family: inherit;
+  padding: 13px 15px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: #fbfbfd;
+  color: var(--text);
+  resize: vertical;
+}
+
+.champ-texte:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+}
+
+.champ-select {
+  font-size: 1rem;
+  font-family: inherit;
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: #fbfbfd;
+  color: var(--text);
+}
+
+/* Zone de dépôt des fichiers joints (glisser-déposer) */
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  padding: 28px 18px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone:hover,
+.dropzone:focus-visible {
+  border-color: var(--accent);
+  background: #f6f7fb;
+  outline: none;
+}
+
+.dropzone.actif {
+  border-color: var(--accent);
+  background: #eef0fa;
+}
+
+/* ---------- Blog d'accueil (phase 3, F3) ---------- */
+
+.article-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 20px;
+}
+
+.article-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.article-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  color: var(--text);
+  text-decoration: none;
+  flex: 1;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.article-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 14px rgba(51, 55, 74, 0.08);
+}
+
+.article-card-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.article-card-vide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  background: #eef0fa;
+}
+
+.article-card-corps {
+  padding: 16px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.article-cartouche {
+  min-height: 20px;
+}
+
+.article-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.article-date {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* F3.1 : chapô de deux lignes maximum. */
+.article-chapo {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-lire {
+  align-self: flex-start;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+.tag.une {
+  background: var(--amber-bg);
+  color: var(--amber);
+}
+
+.article-actions {
+  align-items: center;
+}
+
+/* Article complet (F3.3) */
+
+.article-complet {
+  max-width: 760px;
+}
+
+.article-complet .article-date {
+  margin: 4px 0 18px;
+}
+
+.article-illustration {
+  width: 100%;
+  max-height: 380px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.contenu-cours img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.article-pied {
+  border-top: 1px solid var(--border);
+  margin-top: 28px;
+  padding-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.article-auteur {
+  margin: 0;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+/* Éditeur professeur (F3.4) */
+
+.illustration-apercu img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.editeur-pied {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.editeur-statut {
+  color: var(--green);
+  font-size: 0.9rem;
 }
 
 /* ---------- Responsive (exigence 7.5) ---------- */
