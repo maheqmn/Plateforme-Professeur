@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 import { dureeValiditeInvitation, statutInvitation } from "@/lib/invitation";
+import { dureeCreneau, maxRdvParEleve } from "@/lib/calendrier";
 import InvitationForm from "./invitation-form";
 import ParametresForm from "./parametres-form";
 import { revoquerInvitationAction, basculerEleveAction } from "./actions";
@@ -36,6 +37,7 @@ export default async function PageAdmin() {
     orderBy: { createdAt: "desc" },
   });
   const jours = await dureeValiditeInvitation();
+  const [creneau, maxRdv] = await Promise.all([dureeCreneau(), maxRdvParEleve()]);
 
   return (
     <>
@@ -150,7 +152,7 @@ export default async function PageAdmin() {
 
       <section className="admin-section" aria-label="Paramètres">
         <h2 className="section-title">Paramètres</h2>
-        <ParametresForm dureeJours={jours} />
+        <ParametresForm dureeJours={jours} dureeCreneau={creneau} maxRdv={maxRdv} />
       </section>
     </>
   );

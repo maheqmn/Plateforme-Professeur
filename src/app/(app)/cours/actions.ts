@@ -1,15 +1,24 @@
 "use server";
 
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
+import { changerDateSeanceCours } from "@/lib/calendrier";
 import { enregistrerFichier, supprimerDuDisque, TAILLE_MAX_FICHIER } from "@/lib/fichiers";
 
 async function exigerProfesseur() {
   const utilisateur = await getSessionUser();
   if (!utilisateur || utilisateur.role !== "PROFESSEUR") return null;
   return utilisateur;
+}
+
+async function origine(): Promise<string> {
+  const entetes = await headers();
+  const proto = entetes.get("x-forwarded-proto") ?? "http";
+  const hote = entetes.get("host") ?? "localhost:3000";
+  return proto + "://" + hote;
 }
 
 // ---------- Dossiers (niveau 1, F2.1 / F2.5) ----------
@@ -96,6 +105,9 @@ export async function enregistrerCoursAction(_etat: EtatCours, formData: FormDat
   const contenu = String(formData.get("contenu") ?? "");
   const lienExterne = String(formData.get("lienExterne") ?? "").trim() || null;
   const publie = formData.get("publie") === "on"; // F2.6 : par défaut, un nouveau cours est en préparation.
+  // F5.1 / F5.6 : date de séance optionnelle, affichée sur le calendrier.
+  const dateSeanceBrute = String(formData.get("dateSeance") ?? "").trim();
+  const dateSeance = dateSeanceBrute ? new Date(dateSeanceBrute) : null;
 
   if (!titre || !description) {
     return { erreur: "Le titre et la description sont obligatoires." };
@@ -103,14 +115,20 @@ export async function enregistrerCoursAction(_etat: EtatCours, formData: FormDat
   if (lienExterne && !/^https?:\/\//.test(lienExterne)) {
     return { erreur: "Le lien externe doit commencer par http:// ou https://." };
   }
+  if (dateSeance && isNaN(dateSeance.getTime())) {
+    return { erreur: "La date de séance est invalide." };
+  }
 
   if (coursId) {
     await prisma.cours.update({
       where: { id: coursId },
       data: { titre, description, contenu, lienExterne, publie },
     });
+    // F5.6 : changement de date de séance + email aux élèves si publié.
+    await changerDateSeanceCours(coursId, dateSeance, await origine());
     revalidatePath("/cours/" + categorieId);
     revalidatePath("/cours/" + categorieId + "/" + coursId);
+    revalidatePath("/calendrier");
     redirect("/cours/" + categorieId + "/" + coursId);
   }
 

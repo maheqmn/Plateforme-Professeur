@@ -8,6 +8,7 @@
     "start": "next start",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "rappels": "tsx prisma/rappels-email.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

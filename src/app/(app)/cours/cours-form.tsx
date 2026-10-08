@@ -9,6 +9,7 @@ export type DonneesCours = {
   description: string;
   contenu: string;
   lienExterne: string | null;
+  dateSeance: string | null; // "YYYY-MM-DDTHH:mm" (F5.1/F5.6)
   publie: boolean;
 };
 
@@ -81,6 +82,10 @@ export default function CoursForm({
       <div className="field">
         <label htmlFor="lienExterne">Lien externe (optionnel : vidéo, article...)</label>
         <input id="lienExterne" name="lienExterne" type="url" defaultValue={cours?.lienExterne ?? ""} placeholder="https://..." />
+      </div>
+      <div className="field">
+        <label htmlFor="dateSeance">Date de la séance (affichée sur le calendrier, optionnelle)</label>
+        <input id="dateSeance" name="dateSeance" type="datetime-local" defaultValue={cours?.dateSeance ?? ""} />
       </div>
       <div className="checkbox-line">
         <input id="publie" name="publie" type="checkbox" defaultChecked={cours?.publie ?? false} />

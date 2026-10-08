@@ -34,6 +34,7 @@ model User {
   consultations     Consultation[]
   messagesEnvoyes   Message[]  @relation("MessageAuteur")
   conversations     Message[]  @relation("MessageConversation")
+  rendezVous        RendezVous[]
 }
 
 model Invitation {
@@ -121,6 +122,7 @@ model Cours {
   description String
   contenu     String   @default("") // markdown simple (titres, listes, gras)
   lienExterne String?
+  dateSeance  DateTime? // phase 5 (F5.1) : date de la séance affichée sur le calendrier
   publie      Boolean  @default(false)
   ordre       Int      @default(0)
   createdAt   DateTime @default(now())
@@ -185,6 +187,39 @@ model Message {
   auteur  User     @relation("MessageAuteur", fields: [auteurId], references: [id], onDelete: Cascade)
   eleve   User     @relation("MessageConversation", fields: [eleveId], references: [id], onDelete: Cascade)
   fichiers Fichier[]
+}
+
+// ----- Phase 5 (F5 : calendrier et rendez-vous) -----
+
+// F5.2 : disponibilité récurrente du professeur, ex. "mardi 14h-17h".
+// jour : 1 = lundi ... 7 = dimanche ; debutMin/finMin : minutes depuis minuit.
+model Disponibilite {
+  id        String   @id @default(cuid())
+  jour      Int
+  debutMin  Int
+  finMin    Int
+  createdAt DateTime @default(now())
+}
+
+// F5.2 : exception — date bloquée (vacances, congés...). Clé "YYYY-MM-DD".
+model DateBloquee {
+  date      String   @id
+  createdAt DateTime @default(now())
+}
+
+// F5.3 / F5.4 : rendez-vous individuel sur un créneau verrouillé.
+// Visible du professeur et de l'élève concerné uniquement.
+model RendezVous {
+  id             String    @id @default(cuid())
+  eleveId        String
+  debut          DateTime
+  dureeMin       Int // 30 ou 60 minutes
+  motif          String?
+  lienTeams      String?
+  rappelEnvoyeLe DateTime? // F5.5 : rappel 24h avant, envoyé une seule fois
+  createdAt      DateTime  @default(now())
+
+  eleve User @relation(fields: [eleveId], references: [id], onDelete: Cascade)
 }
 
 // F2.3 / F2.4 — case "Cours terminé" cochée par l'élève.

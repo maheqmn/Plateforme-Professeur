@@ -95,11 +95,33 @@ export async function parametresAction(_etat: EtatParametres, formData: FormData
     return { erreur: "La durée de validité doit être un nombre de jours entre 1 et 30." };
   }
 
+  // F5.8 / F6.3 : durée des créneaux de rendez-vous (30 ou 60 minutes) et
+  // nombre de rendez-vous à venir autorisés par élève.
+  const dureeCreneau = parseInt(String(formData.get("rdvDureeCreneau") ?? ""), 10);
+  if (dureeCreneau !== 30 && dureeCreneau !== 60) {
+    return { erreur: "La durée des créneaux doit être de 30 ou 60 minutes." };
+  }
+  const maxRdv = parseInt(String(formData.get("rdvMaxEleve") ?? ""), 10);
+  if (!Number.isFinite(maxRdv) || maxRdv < 1 || maxRdv > 10) {
+    return { erreur: "Le nombre de rendez-vous simultanés doit être entre 1 et 10." };
+  }
+
   await prisma.setting.upsert({
     where: { key: "invitationDureeJours" },
     update: { value: String(jours) },
     create: { key: "invitationDureeJours", value: String(jours) },
   });
+  await prisma.setting.upsert({
+    where: { key: "rdvDureeCreneau" },
+    update: { value: String(dureeCreneau) },
+    create: { key: "rdvDureeCreneau", value: String(dureeCreneau) },
+  });
+  await prisma.setting.upsert({
+    where: { key: "rdvMaxEleve" },
+    update: { value: String(maxRdv) },
+    create: { key: "rdvMaxEleve", value: String(maxRdv) },
+  });
   revalidatePath("/admin");
+  revalidatePath("/calendrier");
   return { message: "Paramètres enregistrés." };
 }

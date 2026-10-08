@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 import { rendreContenu } from "@/lib/markdown";
+import { formaterDateHeure } from "@/lib/calendrier";
 import CoursForm from "../../cours-form";
 import FichierForm from "../../fichier-form";
 import BoutonSuppression from "@/components/bouton-suppression";
@@ -70,6 +71,14 @@ export default async function PageCoursDetail({
         )}
       </h1>
       <p className="page-subtitle">{cours.description}</p>
+      {cours.dateSeance && (
+        <p className="article-date">
+          Séance le {formaterDateHeure(cours.dateSeance)} — voir le{" "}
+          <Link className="link" href="/calendrier">
+            calendrier
+          </Link>
+        </p>
+      )}
 
       {estProfesseur && (
         <div className="zone-enseignant">
@@ -83,6 +92,17 @@ export default async function PageCoursDetail({
                 description: cours.description,
                 contenu: cours.contenu,
                 lienExterne: cours.lienExterne,
+                dateSeance: cours.dateSeance
+                  ? cours.dateSeance.getFullYear() +
+                    "-" +
+                    String(cours.dateSeance.getMonth() + 1).padStart(2, "0") +
+                    "-" +
+                    String(cours.dateSeance.getDate()).padStart(2, "0") +
+                    "T" +
+                    String(cours.dateSeance.getHours()).padStart(2, "0") +
+                    ":" +
+                    String(cours.dateSeance.getMinutes()).padStart(2, "0")
+                  : null,
                 publie: cours.publie,
               }}
             />

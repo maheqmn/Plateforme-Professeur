@@ -95,8 +95,33 @@ transactionnel (Brevo, Postmark...) dans `src/lib/email.ts`.
 - Les pièces jointes de messages réutilisent le modèle `Fichier` et la route
   `/fichiers/[id]` (accessibles seulement aux deux participants).
 
+### Ce qui est implémenté en phase 5 (calendrier et rendez-vous, F5)
+
+- Calendrier partagé : vue mensuelle ou hebdomadaire, dates de cours visibles
+  de tous, rendez-vous visibles du professeur et de l'élève concerné seul (F5.1).
+- Disponibilités du professeur : plages récurrentes (jour + heures) et dates
+  bloquées (vacances) ; créneaux individuels de 30 ou 60 minutes (F5.2).
+- Prise de rendez-vous : créneaux libres en vert avec « Disponible », fenêtre
+  de confirmation simple avec motif optionnel (F5.3).
+- Verrouillage : le créneau réservé disparaît pour les autres élèves ; la
+  visibilité et la limite d'un rendez-vous à venir (paramétrable) sont
+  contrôlées côté serveur (F5.4, F5.8).
+- Teams : le professeur colle le lien de la réunion, l'élève le voit et le
+  reçoit par email ; rappel 24 heures avant via `npm run rappels`
+  (à planifier en cron en production) (F5.5).
+- Modification / annulation : le professeur déplace ou annule tout rendez-vous
+  (email automatique) ; l'élève annule jusqu'à 24 heures avant ; un cours peut
+  changer de date (champ « date de séance ») et les élèves sont prévenus (F5.6, F5.7).
+- Vue professeur : filtres Tout / Cours / Rendez-vous / Disponibilités et
+  aperçu du jour en liste (F5.9).
+- Ergonomie façon Teams : bouton « Nouvel événement » (rendez-vous avec un élève
+  ou planification de la séance d'un cours), double-clic sur un jour pour créer
+  avec la date pré-remplie, vue Jour heure par heure, et glisser-déposer d'un
+  rendez-vous ou d'un cours vers un autre jour (l'heure est conservée, les
+  emails de déplacement partent automatiquement).
+
 ### À faire (phases suivantes)
 
 - Avertissement « Vous allez être déconnecté » 2 minutes avant expiration (F1.7, partie client).
 - Mentions légales et politique de confidentialité rédigées (8.3).
-- Calendrier (phase 5).
+- Mises en ligne : hébergement, sauvegardes, cron des rappels (phase 6).

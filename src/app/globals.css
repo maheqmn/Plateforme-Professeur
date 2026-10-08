@@ -1205,6 +1205,244 @@ a.folder-card {
   flex-wrap: wrap;
 }
 
+/* ---------- Calendrier (phase 5, F5) ---------- */
+
+.calendrier-barre {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.calendrier-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendrier-titre {
+  font-size: 1.05rem;
+  min-width: 160px;
+  text-align: center;
+}
+
+.calendrier-vues,
+.calendrier-filtres {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.calendrier-filtres {
+  margin-bottom: 14px;
+}
+
+.calendrier-grille {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calendrier-entete {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding: 4px 0;
+  text-transform: capitalize;
+}
+
+.calendrier-jour {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-height: 108px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.calendrier-grille.vue-semaine .calendrier-jour {
+  min-height: 320px;
+}
+
+.calendrier-jour.aujourd-hui {
+  border-color: var(--accent);
+  border-width: 2px;
+}
+
+.calendrier-jour.hors-periode {
+  opacity: 0.45;
+}
+
+.calendrier-numero {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.evenement {
+  display: block;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  padding: 3px 6px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.evenement.cours {
+  background: #eef0fa;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.evenement.rdv {
+  background: var(--amber-bg);
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.evenement.dispos {
+  background: #f0f0f2;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* F5.3 : créneaux libres affichés en vert avec le mot "Disponible". */
+.evenement.creneau-libre {
+  background: var(--green-bg);
+  color: var(--green);
+  font-weight: 700;
+}
+
+.evenement.creneau-libre.statique {
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+a.evenement:hover {
+  filter: brightness(0.95);
+}
+
+.liste-jour {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.liste-jour li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dispos-formulaire {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 10px 0 18px;
+}
+
+.dispos-formulaire .field {
+  margin-bottom: 0;
+}
+
+/* --- Vue du jour, bouton et glisser-déposer (style Teams) --- */
+
+.btn-nouveau-evenement {
+  margin-left: 8px;
+}
+
+.evenement.deplacable {
+  cursor: grab;
+}
+
+.evenement.deplacable:active {
+  cursor: grabbing;
+}
+
+.jour-editable {
+  cursor: context-menu;
+}
+
+.calendrier-jour.jour-editable:hover {
+  border-color: var(--accent);
+}
+
+.calendrier-journee {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.journee-ligne {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 12px;
+  border-top: 1px solid var(--border);
+  padding: 6px 0;
+  min-height: 44px;
+}
+
+.journee-ligne:first-child {
+  border-top: none;
+}
+
+.journee-heure {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  padding-top: 3px;
+}
+
+.journee-contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.journee-contenu .evenement {
+  white-space: normal;
+  align-self: flex-start;
+  max-width: 100%;
+}
+
+.evenement-formulaires {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.erreur-depot {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-radius: 6px;
+  padding: 3px 6px;
+}
+
+.journee-ligne.jour-editable:hover {
+  background: #f8f9fc;
+}
+
 /* ---------- Responsive (exigence 7.5) ---------- */
 
 @media (max-width: 900px) {
