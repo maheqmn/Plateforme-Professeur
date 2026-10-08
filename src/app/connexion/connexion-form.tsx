@@ -7,9 +7,11 @@ import { connexionAction } from "./actions";
 export default function ConnexionForm({
   espaceProfesseur,
   reinitialise,
+  expire,
 }: {
   espaceProfesseur: boolean;
   reinitialise: boolean;
+  expire?: boolean;
 }) {
   const [etat, formAction, enCours] = useActionState(connexionAction, {});
 
@@ -30,6 +32,11 @@ export default function ConnexionForm({
 
         {reinitialise && (
           <p className="notice">Votre mot de passe a bien été modifié. Connectez-vous avec le nouveau.</p>
+        )}
+        {expire && (
+          <p className="notice">
+            Vous avez été déconnecté après 30 minutes sans activité. Reconnectez-vous pour continuer.
+          </p>
         )}
         {etat.erreur && (
           <p className="alert" role="alert">
@@ -66,10 +73,19 @@ export default function ConnexionForm({
           <Link className="link" href={espaceProfesseur ? "/connexion" : "/connexion?espace=professeur"}>
             Espace professeur
           </Link>
+          <Link className="link" href="/aide">
+            Besoin d&apos;aide ? Le mode d&apos;emploi
+          </Link>
         </div>
 
         <p className="login-legal">
-          <a href="#">Mentions légales</a> &middot; <a href="#">Politique de confidentialité</a>
+          <Link className="link" href="/mentions-legales">
+            Mentions légales
+          </Link>{" "}
+          &middot;{" "}
+          <Link className="link" href="/confidentialite">
+            Politique de confidentialité
+          </Link>
         </p>
       </div>
     </main>

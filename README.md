@@ -119,9 +119,30 @@ transactionnel (Brevo, Postmark...) dans `src/lib/email.ts`.
   avec la date pré-remplie, vue Jour heure par heure, et glisser-déposer d'un
   rendez-vous ou d'un cours vers un autre jour (l'heure est conservée, les
   emails de déplacement partent automatiquement).
+- Glisser-déposer affiné : dépôt sur une ligne d'heure en vue Jour pour changer
+  l'heure ; les chevauchements de rendez-vous sont refusés (message clair) à la
+  création comme au déplacement.
 
-### À faire (phases suivantes)
+### Finalisation (F1.7, exigences 7.7 et 8.3)
 
-- Avertissement « Vous allez être déconnecté » 2 minutes avant expiration (F1.7, partie client).
-- Mentions légales et politique de confidentialité rédigées (8.3).
-- Mises en ligne : hébergement, sauvegardes, cron des rappels (phase 6).
+- Bandeau « Vous allez être déconnecté » 2 minutes avant l'expiration (30 minutes
+  d'inactivité, sessions sans « Rester connecté » uniquement) avec compte à
+  rebours et bouton « Rester connecté » qui prolonge la session côté serveur ;
+  redirection vers la connexion avec message explicite à l'expiration.
+- Guide d'aide `/aide` (se connecter, lire un cours, prendre rendez-vous,
+  écrire au professeur) accessible sans connexion, bouton « Aide » permanent en
+  bas de la barre latérale et lien depuis l'écran de connexion.
+- Mentions légales `/mentions-legales` et politique de confidentialité
+  `/confidentialite` rédigées (RGPD : données collectées, hébergement UE, droits
+  d'accès/rectification/suppression), accessibles depuis l'écran de connexion.
+
+### À faire (mise en ligne, phase 6)
+
+Le cahier des charges de cette phase est rédigé :
+**`cahier-des-charges-deploiement.md`** (conteneurisation Docker, orchestration
+k3s, CI/CD, migrations PostgreSQL, sauvegardes, recette). En résumé :
+
+- Hébergement (UE) avec HTTPS, sauvegardes quotidiennes (conservation 30 jours).
+- Cron des rappels (`npm run rappels`, horaire suffit).
+- Brancher un service d'emails transactionnels dans `src/lib/email.ts` (Brevo, Postmark...).
+- Recette accessibilité avec des élèves pilotes.

@@ -61,18 +61,26 @@ export default function Sidebar({
         )}
       </nav>
       <div className="sidebar-footer">
-        <div className="avatar">{initiales}</div>
-        <div>
-          <div className="user-name">
-            {prenom} {nom}
+        <div className="ligne-utilisateur">
+          <div className="avatar">{initiales}</div>
+          <div style={{ minWidth: 0 }}>
+            <div className="user-name">
+              {prenom} {nom}
+            </div>
+            <div className="user-role">{estProfesseur ? "Professeur" : "Élève"}</div>
           </div>
-          <div className="user-role">{estProfesseur ? "Professeur" : "Élève"}</div>
         </div>
-        <form action={deconnexionAction}>
-          <button type="submit" className="btn-logout">
-            Se déconnecter
-          </button>
-        </form>
+        <div className="ligne-actions">
+          <form action={deconnexionAction}>
+            <button type="submit" className="btn-logout">
+              Se déconnecter
+            </button>
+          </form>
+          {/* Exigence 7.7 : bouton d'aide permanent, en bas à droite. */}
+          <Link className="lien-aide" href="/aide" title="Aide — le mode d'emploi de la plateforme">
+            Aide ?
+          </Link>
+        </div>
       </div>
     </aside>
   );

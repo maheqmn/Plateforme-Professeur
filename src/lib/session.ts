@@ -63,6 +63,19 @@ export async function getSessionUser() {
   return session.user;
 }
 
+// F1.7 : le bandeau d'avertissement ne concerne que les sessions sans
+// "Rester connecté" (30 minutes d'inactivité).
+export async function detailsSession(): Promise<{ rememberMe: boolean } | null> {
+  const store = await cookies();
+  const token = store.get(NOM_COOKIE)?.value;
+  if (!token) return null;
+  const session = await prisma.session.findUnique({
+    where: { tokenHash: empreinteToken(token) },
+    select: { rememberMe: true },
+  });
+  return session;
+}
+
 export async function detruireSession(): Promise<void> {
   const store = await cookies();
   const token = store.get(NOM_COOKIE)?.value;

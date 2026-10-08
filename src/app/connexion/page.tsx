@@ -6,7 +6,7 @@ import ConnexionForm from "./connexion-form";
 export default async function PageConnexion({
   searchParams,
 }: {
-  searchParams: Promise<{ espace?: string; reinitialise?: string }>;
+  searchParams: Promise<{ espace?: string; reinitialise?: string; expire?: string }>;
 }) {
   const params = await searchParams;
 
@@ -17,6 +17,7 @@ export default async function PageConnexion({
     <ConnexionForm
       espaceProfesseur={params.espace === "professeur"}
       reinitialise={params.reinitialise === "1"}
+      expire={params.expire === "1"}
     />
   );
 }
