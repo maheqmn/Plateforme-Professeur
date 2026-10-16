@@ -4,6 +4,9 @@ import type { NextConfig } from "next";
 // est 1 Mo ; sans cette configuration, tout fichier plus gros est rejeté
 // ("Body exceeded 1 MB limit") avant même le contrôle serveur de taille.
 const nextConfig: NextConfig = {
+  // D1.1 : sortie standalone pour l'image Docker de production (next start
+  // n'embarque que le serveur minimal, sans node_modules complet).
+  output: "standalone",
   experimental: {
     serverActions: {
       bodySizeLimit: "12mb",

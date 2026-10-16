@@ -1,0 +1,19 @@
+# D1.2 : contexte de build minimal — aucun artefact, secret ou donnée locale.
+.git
+.gitignore
+.next
+node_modules
+out
+stockage
+prisma/dev.db
+prisma/dev.db-journal
+.env
+*.md
+maquettes
+tsconfig.tsbuildinfo
+next-env.d.ts
+Dockerfile
+.dockerignore
+docker-compose.yml
+deploy
+.vibe

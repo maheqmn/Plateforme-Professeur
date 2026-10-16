@@ -146,3 +146,29 @@ k3s, CI/CD, migrations PostgreSQL, sauvegardes, recette). En résumé :
 - Cron des rappels (`npm run rappels`, horaire suffit).
 - Brancher un service d'emails transactionnels dans `src/lib/email.ts` (Brevo, Postmark...).
 - Recette accessibilité avec des élèves pilotes.
+
+## Conteneurisation (Docker)
+
+Fichiers : `Dockerfile` (cibles `app` et `outils`), `.dockerignore`,
+`docker-compose.yml`, script `deploy/docker/build.sh` (exigences D1 du cahier
+des charges de déploiement).
+
+- L'image applicative est un build multi-étapes sur `node:22-alpine` : elle
+  n'embarque que la sortie standalone de Next.js, exécutée en utilisateur
+  non-root, avec un `HEALTHCHECK` sur `/api/sante`. En production elle cible
+  PostgreSQL (le schéma bascule de SQLite à PostgreSQL au build) ; le
+  développement local hors Docker reste sur SQLite, inchangé.
+- `docker compose` remonte l'application + PostgreSQL 16 + Mailpit. Le service
+  `migrate` applique `prisma migrate deploy` avant le démarrage de l'app.
+
+```bash
+npm run docker:build     # images taguées par SHA Git + latest (D1.5)
+npm run docker:up        # app + PostgreSQL + Mailpit sur http://localhost:3000
+npm run docker:recette   # idem, avec le contenu d'exemple (profil "seed")
+npm run docker:down      # arrête l'environnement (volumes conservés)
+```
+
+Profils optionnels : `--profile seed` (contenu d'exemple), `--profile rappels`
+(rappels 24 h exécutés toutes les heures). Interface Mailpit :
+http://localhost:8025 (le branchement SMTP reste à faire dans `src/lib/email.ts`).
+
