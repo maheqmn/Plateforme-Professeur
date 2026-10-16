@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # Phase 6 — conteneurisation (cahier des charges de déploiement, D1).
 # Cibles :
 #   app (défaut) : image applicative minimale (sortie standalone Next.js)
