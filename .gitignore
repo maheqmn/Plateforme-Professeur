@@ -17,5 +17,8 @@ prisma/dev.db-journal
 # fichiers téléversés par le professeur (développement)
 stockage/
 
+# sauvegardes locales (production sur le Pi)
+backups/
+
 # divers
 .DS_Store

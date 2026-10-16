@@ -1,0 +1,27 @@
+# Extrait à AJOUTER au Caddyfile du compose de la galerie (frontal unique du Pi),
+# puis recharger : docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
+#
+# Prérequis : le service caddy de la galerie est attaché au réseau externe "web"
+# (voir deploy/README.md §4) — l'app est joignable sous l'alias "plateforme-app".
+
+cours.galleriedearmelle.fr {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options    "nosniff"
+		X-Frame-Options           "DENY"
+		Referrer-Policy           "strict-origin-when-cross-origin"
+		Permissions-Policy        "camera=(), microphone=(), geolocation=()"
+	}
+
+	# Next.js (sortie standalone) — tout passe par l'app, fichiers joints inclus
+	# (ils sont vérifiés par session côté serveur, pas servis statiquement).
+	reverse_proxy plateforme-app:3000
+
+	log {
+		output stdout
+		format json
+		level  INFO
+	}
+}

@@ -1,0 +1,148 @@
+name: CI/CD — Raspberry Pi
+
+# Chaîne de déploiement production (cahier des charges D4, adapté au Pi) :
+#   push sur main        → qualité + build images ARM64 → ghcr.io (tags sha + latest)
+#   tag v*               → en plus : déploiement production sur le Pi (décision
+#                          humaine explicite, D4.3)
+#   pull-request        → qualité uniquement
+#
+# SECRETS REQUIS (GitHub → Settings → Secrets and variables → Actions) :
+#   PI_HOST       ex : galleriedearmelle.fr  ou  82.xx.xx.xx
+#   PI_USER       ex : pi
+#   PI_SSH_KEY    clé privée SSH complète (-----BEGIN OPENSSH PRIVATE KEY-----)
+#   PI_SSH_PORT   optionnel (défaut : 22)
+#   PI_PATH       chemin absolu du dépôt sur le Pi, ex : /home/pi/Plateforme-Professeur
+#
+# PRÉREQUIS SUR LE PI (une fois) : docker login ghcr.io
+#   (PAT GitHub classique scope read:packages — voir deploy/README.md §6)
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: ci-cd-production
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_APP: ghcr.io/${{ github.repository_owner }}/plateforme-professeur
+  IMAGE_OUTILS: ghcr.io/${{ github.repository_owner }}/plateforme-professeur-outils
+
+jobs:
+  # ── 1. Qualité (D4.1) ────────────────────────────────────────────
+  qualite:
+    name: Qualité — TypeScript + Prisma
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - run: npx prisma validate
+        env:
+          DATABASE_URL: "file:./dev.db"
+      - run: npx tsc --noEmit
+
+  # ── 2. Build des images production (ARM64, Raspberry Pi 5) ──────
+  build-images:
+    name: Build & push images ARM64
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    needs: [qualite]
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@v3
+      - name: Login ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push image applicative (cible app)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: app
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_APP }}:${{ github.sha }}
+            ${{ env.IMAGE_APP }}${{ github.ref == 'refs/heads/main' && ':latest' || format(':{0}', github.ref_name) }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & push image outils (cible outils)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: outils
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_OUTILS }}:${{ github.sha }}
+            ${{ env.IMAGE_OUTILS }}${{ github.ref == 'refs/heads/main' && ':latest' || format(':{0}', github.ref_name) }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # D4.1 / D7.1 : scan bloquant sur les vulnérabilités critiques.
+      - name: Scan Trivy (image ARM64)
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:latest image \
+            --platform linux/arm64 \
+            --severity CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            "${{ env.IMAGE_APP }}:${{ github.sha }}"
+
+  # ── 3. Déploiement production (uniquement sur tag v*, D4.3) ─────
+  deploy:
+    name: Déploiement SSH Raspberry Pi
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build-images]
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment: production
+    steps:
+      - name: Vérifier les secrets
+        run: |
+          missing=0
+          for s in PI_HOST PI_USER PI_SSH_KEY PI_PATH; do
+            if [ -z "${{ secrets[s] }}" ]; then echo "Secret manquant : $s"; missing=1; fi
+          done
+          [ $missing -eq 0 ] || { echo "Ajoute les secrets dans Settings → Secrets and variables → Actions"; exit 1; }
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PI_SSH_KEY }}
+
+      - name: Ajouter le Pi aux known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.PI_SSH_PORT || '22' }} -H ${{ secrets.PI_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Déployer la version ${{ github.ref_name }}
+        env:
+          PORT: ${{ secrets.PI_SSH_PORT || '22' }}
+        run: |
+          ssh -p "$PORT" ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} bash -s << 'REMOTE'
+            set -euo pipefail
+            cd ${{ secrets.PI_PATH }}
+            ./deploy/pi/deploy.sh ${{ github.ref_name }}
+          REMOTE

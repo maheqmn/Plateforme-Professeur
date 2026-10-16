@@ -172,3 +172,10 @@ Profils optionnels : `--profile seed` (contenu d'exemple), `--profile rappels`
 (rappels 24 h exécutés toutes les heures). Interface Mailpit :
 http://localhost:8025 (le branchement SMTP reste à faire dans `src/lib/email.ts`).
 
+## Déploiement production
+
+Hébergement retenu : le Raspberry Pi 5 de la galerie, frontal Caddy partagé,
+URL **https://cours.galleriedearmelle.fr**. Procédure complète (DNS OVH,
+Caddy, automatisation GitHub Actions sur tag `v*`, sauvegardes, rollback) :
+**`deploy/README.md`**.
+
