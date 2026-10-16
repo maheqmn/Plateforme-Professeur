@@ -1,22 +1,14 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { envoyerEmail } from "../src/lib/email";
 
 // F5.5 : rappel envoyé aux deux parties 24 heures avant le rendez-vous.
 // À exécuter périodiquement (cron horaire en production) :
 //   npm run rappels
 // Le champ rappelEnvoyeLe garantit l'unicité de l'envoi.
+// L'envoi passe par src/lib/email.ts (Brevo en production, console sinon).
 
 const prisma = new PrismaClient();
-
-// En mode développement, les emails sont journalisés par src/lib/email.ts ;
-// ce script réutilise la même sortie pour rester homogène.
-function envoyerEmail(to: string, subject: string, text: string) {
-  console.log("=== EMAIL (mode développement) ===");
-  console.log("À      : " + to);
-  console.log("Objet  : " + subject);
-  console.log(text);
-  console.log("==================================");
-}
 
 function formater(date: Date): string {
   return date.toLocaleString("fr-FR", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
@@ -47,13 +39,13 @@ async function main() {
       (rdv.lienTeams ? "\nLien Microsoft Teams : " + rdv.lienTeams + "\n" : "") +
       "\nÀ très bientôt !";
 
-    await envoyerEmail(rdv.eleve.email, "Rappel : votre rendez-vous " + quand, texte);
+    await envoyerEmail({ to: rdv.eleve.email, subject: "Rappel : votre rendez-vous " + quand, text: texte });
     if (professeur) {
-      await envoyerEmail(
-        professeur.email,
-        "Rappel : rendez-vous avec " + rdv.eleve.prenom + " " + rdv.eleve.nom + " " + quand,
-        "Rendez-vous avec " + rdv.eleve.prenom + " " + rdv.eleve.nom + ".\n\n" + texte
-      );
+      await envoyerEmail({
+        to: professeur.email,
+        subject: "Rappel : rendez-vous avec " + rdv.eleve.prenom + " " + rdv.eleve.nom + " " + quand,
+        text: "Rendez-vous avec " + rdv.eleve.prenom + " " + rdv.eleve.nom + ".\n\n" + texte,
+      });
     }
     await prisma.rendezVous.update({
       where: { id: rdv.id },

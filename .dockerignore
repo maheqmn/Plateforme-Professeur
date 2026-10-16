@@ -8,6 +8,8 @@ stockage
 prisma/dev.db
 prisma/dev.db-journal
 .env
+.env.staging
+prisma/schema.postgres.prisma
 *.md
 maquettes
 tsconfig.tsbuildinfo

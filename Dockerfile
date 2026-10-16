@@ -54,4 +54,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/prisma/schema.prisma ./prisma/schema.prisma
 COPY prisma/migrations ./prisma/migrations
 COPY prisma/seed.ts prisma/rappels-email.ts ./prisma/
+# Le script des rappels réutilise le module d'envoi d'emails (D5.3).
+COPY src/lib/email.ts ./src/lib/email.ts
 CMD ["npx", "prisma", "migrate", "deploy"]

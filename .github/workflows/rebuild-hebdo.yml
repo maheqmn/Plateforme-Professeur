@@ -1,0 +1,76 @@
+name: Rebuild hebdomadaire des images
+
+# D7.1 : les images sont reconstruites chaque semaine sur les bases à jour
+# (node:22-alpine, postgres) puis re-scannées par Trivy. Aucun déploiement
+# automatique : la nouvelle image "latest" sera tirée au prochain déploiement.
+# Un échec du scan (vulnérabilité critique non corrigée) fait échouer le job
+# et doit déclencher une mise à jour des dépendances.
+
+on:
+  schedule:
+    - cron: "17 5 * * 1"  # lundi 05:17 UTC (06:17 heure de Paris)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: rebuild-hebdo
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_APP: ghcr.io/${{ github.repository_owner }}/plateforme-professeur
+  IMAGE_OUTILS: ghcr.io/${{ github.repository_owner }}/plateforme-professeur-outils
+
+jobs:
+  rebuild:
+    name: Rebuild ARM64 + scan Trivy
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - uses: docker/setup-buildx-action@v3
+      - name: Login ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rebuild image applicative (cible app)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: app
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.IMAGE_APP }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Rebuild image outils (cible outils)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: outils
+          platforms: linux/arm64
+          push: true
+          tags: ${{ env.IMAGE_OUTILS }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan Trivy (image ARM64)
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:latest image \
+            --platform linux/arm64 \
+            --severity CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            "${{ env.IMAGE_APP }}:latest"

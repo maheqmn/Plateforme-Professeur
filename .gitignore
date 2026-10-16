@@ -20,5 +20,8 @@ stockage/
 # sauvegardes locales (production sur le Pi)
 backups/
 
+# variante PostgreSQL générée par scripts/migrate-dev.sh
+prisma/schema.postgres.prisma
+
 # divers
 .DS_Store

@@ -111,7 +111,36 @@ jobs:
             --exit-code 1 \
             "${{ env.IMAGE_APP }}:${{ github.sha }}"
 
-  # ── 3. Déploiement production (uniquement sur tag v*, D4.3) ─────
+  # ── 3. Staging automatique à chaque push sur main (D4.2, adapté :   ─
+  #       environnement dédié sur le Pi, accessible par tunnel SSH)   ─
+  deploy-staging:
+    name: Déploiement staging (Pi)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build-images]
+    if: github.ref == 'refs/heads/main'
+    environment: staging
+    steps:
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PI_SSH_KEY }}
+
+      - name: Ajouter le Pi aux known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -p ${{ secrets.PI_SSH_PORT || '22' }} -H ${{ secrets.PI_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Déployer le SHA ${{ github.sha }} sur le staging
+        env:
+          PORT: ${{ secrets.PI_SSH_PORT || '22' }}
+        run: |
+          ssh -p "$PORT" ${{ secrets.PI_USER }}@${{ secrets.PI_HOST }} bash -s << 'REMOTE'
+            set -euo pipefail
+            cd ${{ secrets.PI_PATH }}
+            ./deploy/pi/deploy.sh ${{ github.sha }} staging
+          REMOTE
+
+  # ── 4. Déploiement production (uniquement sur tag v*, D4.3) ───────
   deploy:
     name: Déploiement SSH Raspberry Pi
     runs-on: ubuntu-latest

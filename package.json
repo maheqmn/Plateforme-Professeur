@@ -9,6 +9,8 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "rappels": "tsx prisma/rappels-email.ts",
+    "migrate:deploy": "prisma migrate deploy",
+    "migrate:dev": "sh scripts/migrate-dev.sh",
     "docker:build": "sh deploy/docker/build.sh",
     "docker:up": "docker compose up -d --build",
     "docker:recette": "docker compose --profile seed up -d --build",
