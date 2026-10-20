@@ -1,0 +1,46 @@
+type Courriel = {
+  to: string;
+  subject: string;
+  text: string;
+};
+
+// D5.3 : service transactionnel Brevo en production ; sans EMAIL_API_KEY,
+// journalisation console (développement, staging). L'expéditeur doit être
+// validé dans le compte Brevo (EMAIL_EXPEDITEUR, nom d'affichage facultatif
+// EMAIL_EXPEDITEUR_NOM). Exigence 8.1 : ce module isole le service, tout
+// autre fournisseur se branche ici sans toucher au reste de l'application.
+export async function envoyerEmail(courriel: Courriel): Promise<void> {
+  const cleApi = process.env.EMAIL_API_KEY;
+
+  if (!cleApi) {
+    console.log("=== EMAIL (mode développement) ===");
+    console.log("À      : " + courriel.to);
+    console.log("Objet  : " + courriel.subject);
+    console.log(courriel.text);
+    console.log("==================================");
+    return;
+  }
+
+  const expediteur = process.env.EMAIL_EXPEDITEUR ?? "no-reply@galleriedearmelle.fr";
+  const nomExpediteur = process.env.EMAIL_EXPEDITEUR_NOM;
+
+  const reponse = await fetch("https://api.brevo.com/v3/smtp/emai", {
+    method: "POST",
+    headers: {
+      "api-key": cleApi,
+      "content-type": "application/json",
+      accept: "application/json",
+    },
+    body: JSON.stringify({
+      sender: nomExpediteur ? { email: expediteur, name: nomExpediteur } : { email: expediteur },
+      to: [{ email: courriel.to }],
+      subject: courriel.subject,
+      textContent: courriel.text,
+    }),
+  });
+
+  if (!reponse.ok) {
+    const corps = await reponse.text().catch(() => "");
+    throw new Error("Envoi d'email échoué (" + reponse.status + ") : " + corps);
+  }
+}

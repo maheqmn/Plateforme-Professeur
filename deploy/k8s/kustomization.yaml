@@ -1,0 +1,33 @@
+# Kubernetes — Plateforme-Professeur
+#
+# Manifestes pilotés par kustomize (deploy/k8s/kustomization.yaml). Le tag
+# d'image est injecté par la CI (kustomize edit set image) à chaque
+# déploiement : les manifestes référencent des noms d'image génériques
+# (« plateforme-professeur », « plateforme-professeur-outils ») que kustomize
+# remplace par ghcr.io/<compte>/...:<sha>.
+#
+# Les secrets applicatifs ne sont PAS dans Git : la CI crée la Secret
+# « plateforme-secrets » dans le namespace à partir des secrets GitHub
+# (POSTGRES_PASSWORD, EMAIL_API_KEY, EMAIL_EXPEDITEUR, EMAIL_EXPEDITEUR_NOM).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: plateforme
+
+resources:
+  - namespace.yaml
+  - postgres.yaml
+  - app.yaml
+  - migrate-job.yaml
+  - rappels-cronjob.yaml
+  - ingress.yaml
+
+# Remplacés à chaque déploiement par le SHA du commit
+# (kustomize edit set image ...=ghcr.io/<compte>/...:<sha>).
+images:
+  - name: plateforme-professeur
+    newName: ghcr.io/maheqmn/plateforme-professeur
+    newTag: latest
+  - name: plateforme-professeur-outils
+    newName: ghcr.io/maheqmn/plateforme-professeur-outils
+    newTag: latest

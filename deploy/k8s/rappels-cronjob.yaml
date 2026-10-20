@@ -1,0 +1,45 @@
+# F5.5 : rappels de rendez-vous 24 h avant, execution horaire.
+# CronJob au lieu du conteneur while-true du compose : k8s gere la planification.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: plateforme-rappels
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: rappels
+              # Nom generique remplace par kustomize (ghcr.io/...:<sha>).
+              image: plateforme-professeur-outils:TAG
+              command: ["npx", "tsx", "prisma/rappels-email.ts"]
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: plateforme-secrets
+                      key: DATABASE_URL
+                - name: EMAIL_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: plateforme-secrets
+                      key: EMAIL_API_KEY
+                      optional: true
+                - name: EMAIL_EXPEDITEUR
+                  valueFrom:
+                    secretKeyRef:
+                      name: plateforme-secrets
+                      key: EMAIL_EXPEDITEUR
+                      optional: true
+                - name: EMAIL_EXPEDITEUR_NOM
+                  valueFrom:
+                    secretKeyRef:
+                      name: plateforme-secrets
+                      key: EMAIL_EXPEDITEUR_NOM
+                      optional: true

@@ -1,0 +1,27 @@
+# D2.2 : migrations versionnees appliquees AVANT le rollout applicatif.
+# La CI supprime ce Job puis le recree a chaque deploiement (la spec d'un Job
+# est immuable) et attend sa completion avant de valider le rollout.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: plateforme-migrate
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: plateforme-migrate
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          # Nom generique remplace par kustomize (ghcr.io/...:<sha>).
+          # CMD par defaut de l'image « outils » : npx prisma migrate deploy.
+          image: plateforme-professeur-outils:TAG
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: plateforme-secrets
+                  key: DATABASE_URL

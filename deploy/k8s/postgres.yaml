@@ -1,0 +1,76 @@
+# PostgreSQL 16 en StatefulSet (D2.1 : production sur PostgreSQL).
+# Base de données applicative ; les sauvegardes restent assurées hors cluster
+# (scripts/backup-postgres.sh, à planifier sur un CronJob ou l'hôte si besoin).
+apiVersion: v1
+kind: Service
+metadata:
+  name: plateforme-db
+  labels:
+    app: plateforme-db
+spec:
+  selector:
+    app: plateforme-db
+  ports:
+    - name: pg
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: plateforme-db
+spec:
+  serviceName: plateforme-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: plateforme-db
+  template:
+    metadata:
+      labels:
+        app: plateforme-db
+    spec:
+      containers:
+        - name: db
+          image: postgres:16-alpine
+          env:
+            - name: POSTGRES_USER
+              value: plateforme
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: plateforme-secrets
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              value: plateforme
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "plateforme", "-d", "plateforme"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "plateforme", "-d", "plateforme"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: pgdata
+              mountPath: /var/lib/postgresql/data
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 1Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 5Gi

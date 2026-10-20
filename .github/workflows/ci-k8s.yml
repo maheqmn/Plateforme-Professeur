@@ -1,0 +1,231 @@
+name: CI/CD — Kubernetes (push main → prod)
+
+# Pipeline demandé — à chaque push sur main :
+#   1. tests  : build (compiler/packager), tests unitaires, qualité
+#               (TypeScript, schéma Prisma), sécurité (audit npm, scan Trivy)
+#   2. image  : build des images Docker multi-arch (app + outils), push vers
+#               ghcr.io (tags sha + latest), scan Trivy bloquant
+#   3. prod   : si tout est vert → déploiement Kubernetes automatique
+#               (kubectl : secret, migrations, apply, rollout, /api/sante)
+#
+# ATTENTION : ce workflow et « ci-cd.yml » (déploiement SSH Raspberry Pi)
+# poussent tous deux les tags <sha> et latest des mêmes images sur ghcr.io.
+# Ne pas les laisser actifs simultanément sur main : désactiver l'un des
+# deux (Settings → Actions) ou retirer le job de build de l'ancien.
+#
+# SECRETS REQUIS (GitHub → Settings → Secrets and variables → Actions) :
+#   KUBE_CONFIG         kubeconfig complet du cluster, encodé en base64
+#                       (k3s : base64 -w0 /etc/rancher/k3s/k3s.yaml, après
+#                       avoir remplacé 127.0.0.1 par l'IP/domaine du master)
+#   POSTGRES_PASSWORD  mot de passe PostgreSQL (openssl rand -hex 24)
+#   EMAIL_API_KEY      (optionnel) clé API Brevo — sinon emails en console
+#   EMAIL_EXPEDITEUR   (optionnel) ex : no-reply@galleriedearmelle.fr
+#   EMAIL_EXPEDITEUR_NOM (optionnel) ex : Plateforme du professeur
+#
+# Recommandé : environnement « production » (Settings → Environments) avec
+# un required reviewer pour garder une validation humaine avant la mise en
+# ligne, malgré le déploiement automatique.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: ci-k8s-production
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_APP: ghcr.io/${{ github.repository_owner }}/plateforme-professeur
+  IMAGE_OUTILS: ghcr.io/${{ github.repository_owner }}/plateforme-professeur-outils
+
+jobs:
+  # ── 1. Tests : build, unitaires, qualité, sécurité ─────────────────
+  tests:
+    name: Tests — build, unitaires, qualité, sécurité
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+
+      - name: Qualité — TypeScript strict
+        run: npx tsc --noEmit
+
+      - name: Qualité — schéma Prisma
+        run: npx prisma validate
+        env:
+          DATABASE_URL: "file:./dev.db"
+
+      # Aucun runner de tests installé pour l'instant : ce pas est une
+      # no-op tant que « npm test » n'est pas défini dans package.json.
+      - name: Tests unitaires
+        run: npm test --if-present
+
+      - name: Build — compiler / packager (next build)
+        run: npm run build
+        env:
+          DATABASE_URL: "file:./dev.db"
+
+      - name: Sécurité — audit des dépendances (bloquant sur CRITICAL)
+        run: npm audit --audit-level=critical
+
+      - name: Sécurité — scan Trivy du dépôt
+        run: |
+          docker run --rm \
+            -v "$PWD:/src" \
+            aquasec/trivy:latest fs \
+            --severity CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            /src
+
+  # ── 2. Build des images Docker + push ghcr.io + scan ────────────────
+  image:
+    name: Build & push images Docker (multi-arch)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    needs: [tests]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: amd64,arm64
+      - uses: docker/setup-buildx-action@v3
+      - name: Login ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push image applicative (cible app)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: app
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_APP }}:${{ github.sha }}
+            ${{ env.IMAGE_APP }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & push image outils (cible outils)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: outils
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_OUTILS }}:${{ github.sha }}
+            ${{ env.IMAGE_OUTILS }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # D4.1 / D7.1 : scan bloquant sur les vulnérabilités critiques.
+      - name: Sécurité — scan Trivy des images (bloquant)
+        run: |
+          docker run --rm \
+            aquasec/trivy:latest image \
+            --severity CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            "${IMAGE_APP}:${GITHUB_SHA}"
+          docker run --rm \
+            aquasec/trivy:latest image \
+            --severity CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            "${IMAGE_OUTILS}:${GITHUB_SHA}"
+
+  # ── 3. Déploiement production Kubernetes (si tout est vert) ────────
+  deploy-prod:
+    name: Déploiement Kubernetes — production
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [image]
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vérifier les secrets
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        run: |
+          missing=0
+          check() {
+            if [ -z "$1" ]; then echo "Secret manquant : $2"; missing=1; fi
+          }
+          check "$KUBE_CONFIG" KUBE_CONFIG
+          check "$POSTGRES_PASSWORD" POSTGRES_PASSWORD
+          [ $missing -eq 0 ] || { echo "Ajoute les secrets dans Settings → Secrets and variables → Actions"; exit 1; }
+
+      - name: Configurer kubectl
+        run: |
+          mkdir -p "$HOME/.kube"
+          printf '%s' "${{ secrets.KUBE_CONFIG }}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+          kubectl cluster-info
+
+      # Injecter le SHA du commit comme tag d'image dans les manifestes.
+      - name: Fixer le tag d'image (kustomize)
+        working-directory: deploy/k8s
+        run: |
+          kustomize edit set image \
+            plateforme-professeur="${IMAGE_APP}:${GITHUB_SHA}" \
+            plateforme-professeur-outils="${IMAGE_OUTILS}:${GITHUB_SHA}"
+          kustomize build . > /dev/null
+
+      - name: Créer les secrets applicatifs
+        run: |
+          kubectl apply -f deploy/k8s/namespace.yaml
+          kubectl -n plateforme create secret generic plateforme-secrets \
+            --from-literal=POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
+            --from-literal=DATABASE_URL="postgresql://plateforme:${{ secrets.POSTGRES_PASSWORD }}@plateforme-db:5432/plateforme?schema=public" \
+            --from-literal=EMAIL_API_KEY="${{ secrets.EMAIL_API_KEY || '' }}" \
+            --from-literal=EMAIL_EXPEDITEUR="${{ secrets.EMAIL_EXPEDITEUR || '' }}" \
+            --from-literal=EMAIL_EXPEDITEUR_NOM="${{ secrets.EMAIL_EXPEDITEUR_NOM || '' }}" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Déployer (apply + migrations)
+        run: |
+          # La spec d'un Job est immuable : le supprimer pour le recréer
+          # avec l'image du nouveau SHA.
+          kubectl -n plateforme delete job plateforme-migrate --ignore-not-found=true
+          kubectl apply -k deploy/k8s
+          kubectl -n plateforme rollout status statefulset/plateforme-db --timeout=180s
+          kubectl -n plateforme wait --for=condition=complete job/plateforme-migrate --timeout=300s
+
+      - name: Attendre le rollout applicatif (zéro coupure)
+        run: |
+          kubectl -n plateforme rollout status deployment/plateforme-app --timeout=300s
+
+      - name: Contrôle de santé (/api/sante)
+        run: |
+          kubectl -n plateforme port-forward service/plateforme-app 3000:3000 &
+          PF_PID=$!
+          trap 'kill $PF_PID' EXIT
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/api/sante; then
+              echo
+              echo "Déploiement sain : ${IMAGE_APP}:${GITHUB_SHA} est en production."
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Échec du contrôle de santé après le rollout."
+          kubectl -n plateforme get pods
+          exit 1

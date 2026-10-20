@@ -1,0 +1,28 @@
+# Exposition HTTP(S) de l'application.
+# ingressClassName: traefik = valeur par defaut de k3s ; a adapter selon le
+# controleur installe (nginx, etc.). TLS : si cert-manager est present,
+# decommenter le bloc annotations cert-manager et le bloc tls ; sinon le
+# controleur sert son certificat par defaut (a configurer sur le frontal).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: plateforme-app
+  annotations:
+    # cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: cours.galleriedearmelle.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: plateforme-app
+                port:
+                  number: 3000
+  # tls:
+  #   - hosts:
+  #       - cours.galleriedearmelle.fr
+  #     secretName: plateforme-tls
